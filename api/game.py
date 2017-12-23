@@ -1,6 +1,7 @@
 import random
 import yaml
 import os
+import uuid
 
 
 class Game(object):
@@ -17,6 +18,7 @@ class Game(object):
             self.double_rent_mode = saved_json['double_rent_mode']
             self.discard_pile = saved_json['discard_card']
             self.deck = saved_json['deck']
+            self.id = saved_json['id']
         else:
             self.discard_pile = []
 
@@ -38,6 +40,7 @@ class Game(object):
             self.debts = {}
             self.cards_to_act = {} # player to list
             self.double_rent_mode = False
+            self.id = str(uuid.uuid4())
 
     def save(self):
         '''returns dictionary of game that can be dumped to json'''
@@ -47,7 +50,7 @@ class Game(object):
             'cards_to_act': self.cards_to_act,
             'double_rent_mode': self.double_rent_mode,
             'discard_pile': self.discard_pile,
-            'deck': self.deck
+            'deck': self.deck, 'id': self.id
         }
 
     def _load_cards(self):
@@ -260,4 +263,6 @@ class Game(object):
         return len(self.current_player['hand']) < 7 and len(self.debts) == 0 and len(self.cards_to_act) == 0
 
 if __name__ == '__main__':
-    g = Game()
+    g = Game().id
+    g2 = Game().id
+    print g, g2
