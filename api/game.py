@@ -8,6 +8,7 @@ class Game(object):
 
     def __init__(self, num_players=4, saved_json=None):
         self._load_cards()
+        # TODO log
 
         if saved_json:
             self.players = saved_json['players']
@@ -42,7 +43,7 @@ class Game(object):
             self.double_rent_mode = False
             self.id = str(uuid.uuid4())
 
-    def save(self):
+    def json(self):
         '''returns dictionary of game that can be dumped to json'''
         return {
             'players': self.players, 'turn': self.turn,
@@ -244,6 +245,19 @@ class Game(object):
         if had_card:
             self.current_player['property'][property_set].append(card)
             self.moves_left -= 1
+        return self._check_if_won()
+
+    def place_card(self, player, card, location):
+        '''Puts a card from cards_to_act in a location'''
+        if location == 'bank':
+            self.players[player]['bank'].append(card)
+        else:
+            self.players[player]['property'][location].append(card)
+
+        # remove card from cards_to_act
+        self.cards_to_act[player].remove(card)
+        if len(self.cards_to_act[player]) == 0:
+            del self.cards_to_act[player]
         return self._check_if_won()
 
     def discard_card(self, card):

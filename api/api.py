@@ -10,12 +10,17 @@ in_room = {}  # map username to room that player is in
 games = {}  # map of game ids to games
 
 
-def _get_game_for_host(host):
-    '''returns the game object for a particular host'''
+def _get_game_for_player(player):
+    '''returns the game object for a particular player'''
+    host = in_room[player]
     return games[lobby[host]['game']]
 
+def _get_player_id_in_game(player):
+    host = in_room[player]
+    return lobby[host]['users'].index(player)
 
-# handle lobby stuff
+
+# LOBBY METHODS
 @app.route("/api/create", methods=['POST'])
 def create_room():
     data = request.get_json()
@@ -51,6 +56,90 @@ def start_game():
     lobby[username]['game'] = game.id
     games[game.id] = game
     return jsonify({'result': username + ' started the game!'})
+
+
+# GAME METHODS
+@app.route("/api/get_game", methods=['GET'])
+def get_game():
+    username = request.args.get('username')
+    host = in_room[username]
+    return jsonify({
+        'game': _get_game_for_player(username).json(),
+        'players': lobby[host]['users']
+    })
+
+
+@app.route("/api/play_card", methods=['POST'])
+def play_card():
+    data = request.get_json()
+    if not data or not 'username' in data:
+        abort(400)
+    game = _get_game_for_player(data['username'])
+    player_id = _get_player_id_in_game(data['username'])
+    won, debts, err = game.play_card(
+        data['card'], data.get('property_set'), data.get('as_money'),
+        data.get('other_player'), data.get('other_info')
+    )
+    return jsonify({'won': None, 'debts': debts, 'err': err})
+
+# TODO everything below this
+
+@app.route("/api/move_card", methods=['POST'])
+def move_card():
+    data = request.get_json()
+    if not data or not 'username' in data:
+        abort(400)
+    game = _get_game_for_player(data['username'])
+    player_id = _get_player_id_in_game(data['username'])
+    won, debts, err = game.play_card(
+        data['card'], data.get('property_set'), data.get('as_money'),
+        data.get('other_player'), data.get('other_info')
+    )
+    return jsonify({'won': None, 'debts': debts, 'err': err})
+
+
+@app.route("/api/place_card", methods=['POST'])
+def place_card():
+    data = request.get_json()
+    if not data or not 'username' in data:
+        abort(400)
+    game = _get_game_for_player(data['username'])
+    player_id = _get_player_id_in_game(data['username'])
+    won, debts, err = game.play_card(
+        data['card'], data.get('property_set'), data.get('as_money'),
+        data.get('other_player'), data.get('other_info')
+    )
+    return jsonify({'won': None, 'debts': debts, 'err': err})
+
+
+@app.route("/api/discard_cards", methods=['POST'])
+def discard_cards():
+    data = request.get_json()
+    if not data or not 'username' in data:
+        abort(400)
+    game = _get_game_for_player(data['username'])
+    player_id = _get_player_id_in_game(data['username'])
+    won, debts, err = game.play_card(
+        data['card'], data.get('property_set'), data.get('as_money'),
+        data.get('other_player'), data.get('other_info')
+    )
+    return jsonify({'won': None, 'debts': debts, 'err': err})
+
+
+@app.route("/api/end_turn", methods=['POST'])
+def end_turn():
+    data = request.get_json()
+    if not data or not 'username' in data:
+        abort(400)
+    game = _get_game_for_player(data['username'])
+    player_id = _get_player_id_in_game(data['username'])
+    won, debts, err = game.play_card(
+        data['card'], data.get('property_set'), data.get('as_money'),
+        data.get('other_player'), data.get('other_info')
+    )
+    return jsonify({'won': None, 'debts': debts, 'err': err})
+
+# TODO add log to game.py
 
 
 if __name__ == '__main__':
